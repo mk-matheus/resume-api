@@ -94,7 +94,8 @@ const deletePerson = asyncHandler(async (req, res) => {
     return res.status(403).json({ error: "Acesso negado." });
   }
 
-  await person.destroy();
+  // Deleta o User (que por CASCADE remove a Person e todos os sub-recursos)
+  await models.User.destroy({ where: { objectId: person.userId } });
   return res.status(204).send();
 });
 
