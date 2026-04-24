@@ -17,6 +17,7 @@ type FormData = z.infer<typeof schema>;
 export default function LoginPage() {
   const { login } = useAuth();
   const [serverError, setServerError] = useState("");
+  const [isNotFound, setIsNotFound] = useState(false);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -24,10 +25,22 @@ export default function LoginPage() {
 
   const onSubmit = async (data: FormData) => {
     setServerError("");
+    setIsNotFound(false);
     try {
       await login(data.email, data.password);
     } catch (err: any) {
-      setServerError(err.response?.data?.error || "Erro ao entrar. Verifique suas credenciais.");
+      const status = err.response?.status;
+      const code = err.response?.data?.code;
+      const message = err.response?.data?.error;
+
+      if (status === 404 && code === "USER_NOT_FOUND") {
+        setIsNotFound(true);
+        setServerError(message || "Nenhuma conta encontrada com este e-mail.");
+      } else if (status === 401 && code === "INVALID_PASSWORD") {
+        setServerError(message || "Senha incorreta. Tente novamente.");
+      } else {
+        setServerError("Erro ao entrar. Verifique suas credenciais.");
+      }
     }
   };
 
@@ -51,8 +64,23 @@ export default function LoginPage() {
           </div>
 
           {serverError && (
-            <div className="mb-6 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-              {serverError}
+            <div className={`mb-6 px-4 py-3 rounded-xl border text-sm ${
+              isNotFound
+                ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                : "bg-red-500/10 border-red-500/20 text-red-400"
+            }`}>
+              <p>{serverError}</p>
+              {isNotFound && (
+                <p className="mt-2">
+                  Ainda não tem conta?{" "}
+                  <Link
+                    href="/auth/register"
+                    className="text-brand-400 hover:text-brand-300 font-medium underline underline-offset-2 transition-colors"
+                  >
+                    Criar conta grátis →
+                  </Link>
+                </p>
+              )}
             </div>
           )}
 

@@ -23,6 +23,7 @@ export interface Education {
   objectId: string;
   institutionName: string;
   course: string;
+  degree?: string;
   startDate?: string;
   endDate?: string;
   status?: string;

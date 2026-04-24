@@ -13,7 +13,18 @@ const schema = z.object({
   startDate:   z.string().optional(),
   endDate:     z.string().optional(),
   description: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    if (data.startDate && data.endDate) {
+      return new Date(data.endDate) >= new Date(data.startDate);
+    }
+    return true;
+  },
+  {
+    message: "A data de fim não pode ser anterior à data de início.",
+    path: ["endDate"],
+  }
+);
 type FormData = z.infer<typeof schema>;
 
 interface Props {
@@ -34,10 +45,28 @@ export default function ExperienceForm({ initial, onSave, onCancel }: Props) {
     },
   });
 
-  useEffect(() => { if (initial) reset({ ...initial, description: initial.description ?? "" }); }, [initial]);
+  useEffect(() => {
+    if (initial) reset({
+      companyName: initial.companyName ?? "",
+      role:        initial.role        ?? "",
+      startDate:   initial.startDate   ?? "",
+      endDate:     initial.endDate     ?? "",
+      description: initial.description ?? "",
+    });
+  }, [initial, reset]);
+
+  // Sanitiza datas vazias ("" → null) antes de enviar
+  const handleSave = async (data: FormData) => {
+    const sanitized = {
+      ...data,
+      startDate: data.startDate || undefined,
+      endDate:   data.endDate   || undefined,
+    };
+    await onSave(sanitized);
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSave)} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit(handleSave)} className="flex flex-col gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="label">Empresa</label>
@@ -52,10 +81,12 @@ export default function ExperienceForm({ initial, onSave, onCancel }: Props) {
         <div>
           <label className="label">Início</label>
           <input {...register("startDate")} type="date" className="input" />
+          {errors.startDate && <p className="text-red-400 text-xs mt-1">{errors.startDate.message}</p>}
         </div>
         <div>
           <label className="label">Fim (deixe vazio se atual)</label>
           <input {...register("endDate")} type="date" className="input" />
+          {errors.endDate && <p className="text-red-400 text-xs mt-1">{errors.endDate.message}</p>}
         </div>
       </div>
       <div>

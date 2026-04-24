@@ -166,9 +166,14 @@ export default function PublicResume({ person, username }: Props) {
                 <div key={ed.objectId} className="card py-4 px-5">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                     <h3 className="font-display font-semibold text-white">{ed.course}</h3>
-                    {ed.status && (
-                      <span className="badge text-xs">{ed.status}</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {ed.degree && (
+                        <span className="badge text-xs">{ed.degree}</span>
+                      )}
+                      {ed.status && (
+                        <span className="badge text-xs">{ed.status}</span>
+                      )}
+                    </div>
                   </div>
                   <p className="text-white/40 text-sm mt-0.5">{ed.institutionName}</p>
                   {(ed.startDate || ed.endDate) && (

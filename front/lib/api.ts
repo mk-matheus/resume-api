@@ -15,10 +15,20 @@ api.interceptors.request.use((config) => {
 });
 
 // Redireciona para login se o token expirar
+// Ignora rotas de auth para não causar loop infinito
 api.interceptors.response.use(
   (res) => res,
   (error) => {
-    if (error.response?.status === 401 && typeof window !== "undefined") {
+    const requestUrl = error.config?.url || "";
+    const isAuthRoute =
+      requestUrl.includes("/auth/login") ||
+      requestUrl.includes("/auth/register");
+
+    if (
+      error.response?.status === 401 &&
+      !isAuthRoute &&
+      typeof window !== "undefined"
+    ) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/auth/login";

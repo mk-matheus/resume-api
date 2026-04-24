@@ -7,6 +7,25 @@ const findOwnedPerson = async (models, personId, userId) => {
   return { person };
 };
 
+// Campos permitidos para Education (inclui degree)
+const ALLOWED_FIELDS = ["institutionName", "course", "degree", "startDate", "endDate", "status"];
+
+// Sanitiza campos de data: "" → null
+const sanitizeDates = (data) => {
+  const sanitized = { ...data };
+  if (sanitized.startDate === "") sanitized.startDate = null;
+  if (sanitized.endDate === "") sanitized.endDate = null;
+  return sanitized;
+};
+
+const pickFields = (body, fields) => {
+  const data = {};
+  fields.forEach((field) => {
+    if (body[field] !== undefined) data[field] = body[field];
+  });
+  return data;
+};
+
 const getAllEducations = asyncHandler(async (req, res) => {
   const { personId } = req.params;
   const educations = await req.context.models.Education.findAll({
@@ -22,8 +41,10 @@ const createEducation = asyncHandler(async (req, res) => {
   );
   if (error) return res.status(status).json({ error });
 
+  const data = sanitizeDates(pickFields(req.body, ALLOWED_FIELDS));
+
   const education = await req.context.models.Education.create({
-    ...req.body,
+    ...data,
     personId: person.objectId,
   });
   return res.status(201).json(education);
@@ -36,8 +57,10 @@ const updateEducation = asyncHandler(async (req, res) => {
   );
   if (error) return res.status(status).json({ error });
 
+  const data = sanitizeDates(pickFields(req.body, ALLOWED_FIELDS));
+
   const [affectedRows, updated] = await req.context.models.Education.update(
-    req.body,
+    data,
     { where: { objectId: educationId, personId }, returning: true }
   );
   if (affectedRows === 0)

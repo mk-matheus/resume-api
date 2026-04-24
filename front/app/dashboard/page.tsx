@@ -328,8 +328,11 @@ export default function DashboardPage() {
               <ItemRow
                 key={ed.objectId}
                 title={ed.course}
-                subtitle={ed.institutionName}
-                meta={ed.status}
+                subtitle={`${ed.institutionName}${ed.degree ? ` · ${ed.degree}` : ""}`}
+                meta={[
+                  ed.status,
+                  ed.startDate ? `${formatDate(ed.startDate)}${ed.endDate ? ` → ${formatDate(ed.endDate)}` : ""}` : null,
+                ].filter(Boolean).join(" · ") || undefined}
                 onEdit={() => openModal("education", ed)}
                 onDelete={() => deleteEducation(ed.objectId)}
               />

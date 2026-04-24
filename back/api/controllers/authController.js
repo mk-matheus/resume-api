@@ -63,12 +63,18 @@ const login = asyncHandler(async (req, res) => {
   const user = await models.User.findOne({ where: { email } });
 
   if (!user) {
-    return res.status(401).json({ error: "Credenciais inválidas." });
+    return res.status(404).json({
+      error: "Nenhuma conta encontrada com este e-mail.",
+      code: "USER_NOT_FOUND",
+    });
   }
 
   const passwordMatch = await bcrypt.compare(password, user.passwordHash);
   if (!passwordMatch) {
-    return res.status(401).json({ error: "Credenciais inválidas." });
+    return res.status(401).json({
+      error: "Senha incorreta. Tente novamente.",
+      code: "INVALID_PASSWORD",
+    });
   }
 
   const token = jwt.sign(

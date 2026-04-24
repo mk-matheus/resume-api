@@ -15,6 +15,10 @@ const getEducationModel = (sequelize, { DataTypes }) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    degree: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     startDate: {
       type: DataTypes.DATEONLY,
       allowNull: true,

@@ -15,9 +15,22 @@ export const createExperienceRules = [
     .withMessage('O campo "role" deve ser uma string.'),
 
   body("startDate")
-    .optional()
+    .optional({ values: "null" })
     .isISO8601()
     .withMessage('O campo "startDate" deve ser uma data válida (YYYY-MM-DD).'),
+
+  body("endDate")
+    .optional({ values: "null" })
+    .isISO8601()
+    .withMessage('O campo "endDate" deve ser uma data válida (YYYY-MM-DD).')
+    .custom((endDate, { req }) => {
+      if (endDate && req.body.startDate) {
+        if (new Date(endDate) < new Date(req.body.startDate)) {
+          throw new Error("A data de fim não pode ser anterior à data de início.");
+        }
+      }
+      return true;
+    }),
 
   body("description")
     .optional()
@@ -38,9 +51,22 @@ export const updateExperienceRules = [
     .withMessage('O campo "role" deve ser uma string.'),
 
   body("startDate")
-    .optional()
+    .optional({ values: "null" })
     .isISO8601()
     .withMessage('O campo "startDate" deve ser uma data válida (YYYY-MM-DD).'),
+
+  body("endDate")
+    .optional({ values: "null" })
+    .isISO8601()
+    .withMessage('O campo "endDate" deve ser uma data válida (YYYY-MM-DD).')
+    .custom((endDate, { req }) => {
+      if (endDate && req.body.startDate) {
+        if (new Date(endDate) < new Date(req.body.startDate)) {
+          throw new Error("A data de fim não pode ser anterior à data de início.");
+        }
+      }
+      return true;
+    }),
 
   body("description")
     .optional()

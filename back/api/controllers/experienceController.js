@@ -8,6 +8,26 @@ const findOwnedPerson = async (models, personId, userId) => {
   return { person };
 };
 
+// Campos permitidos para Experience (previne mass assignment)
+const ALLOWED_FIELDS = ["companyName", "role", "startDate", "endDate", "description"];
+
+// Sanitiza campos de data: "" → null
+const sanitizeDates = (data) => {
+  const sanitized = { ...data };
+  if (sanitized.startDate === "") sanitized.startDate = null;
+  if (sanitized.endDate === "") sanitized.endDate = null;
+  return sanitized;
+};
+
+// Extrai apenas campos permitidos do body
+const pickFields = (body, fields) => {
+  const data = {};
+  fields.forEach((field) => {
+    if (body[field] !== undefined) data[field] = body[field];
+  });
+  return data;
+};
+
 const getAllExperiences = asyncHandler(async (req, res) => {
   const { personId } = req.params;
   const experiences = await req.context.models.Experience.findAll({
@@ -23,8 +43,10 @@ const createExperience = asyncHandler(async (req, res) => {
   );
   if (error) return res.status(status).json({ error });
 
+  const data = sanitizeDates(pickFields(req.body, ALLOWED_FIELDS));
+
   const experience = await req.context.models.Experience.create({
-    ...req.body,
+    ...data,
     personId: person.objectId,
   });
   return res.status(201).json(experience);
@@ -37,8 +59,10 @@ const updateExperience = asyncHandler(async (req, res) => {
   );
   if (error) return res.status(status).json({ error });
 
+  const data = sanitizeDates(pickFields(req.body, ALLOWED_FIELDS));
+
   const [affectedRows, updated] = await req.context.models.Experience.update(
-    req.body,
+    data,
     { where: { objectId: experienceId, personId }, returning: true }
   );
   if (affectedRows === 0)
