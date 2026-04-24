@@ -1,30 +1,8 @@
 import asyncHandler from "../utils/asyncHandler";
+import findOwnedPerson from "../utils/findOwnedPerson";
+import { pickFields, sanitizeDates } from "../utils/sanitizers";
 
-const findOwnedPerson = async (models, personId, userId) => {
-  const person = await models.Person.findByPk(personId);
-  if (!person) return { error: "Pessoa não encontrada.", status: 404 };
-  if (person.userId !== userId) return { error: "Acesso negado.", status: 403 };
-  return { person };
-};
-
-// Campos permitidos para Education (inclui degree)
 const ALLOWED_FIELDS = ["institutionName", "course", "degree", "startDate", "endDate", "status"];
-
-// Sanitiza campos de data: "" → null
-const sanitizeDates = (data) => {
-  const sanitized = { ...data };
-  if (sanitized.startDate === "") sanitized.startDate = null;
-  if (sanitized.endDate === "") sanitized.endDate = null;
-  return sanitized;
-};
-
-const pickFields = (body, fields) => {
-  const data = {};
-  fields.forEach((field) => {
-    if (body[field] !== undefined) data[field] = body[field];
-  });
-  return data;
-};
 
 const getAllEducations = asyncHandler(async (req, res) => {
   const { personId } = req.params;

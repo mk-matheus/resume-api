@@ -1,11 +1,8 @@
 import asyncHandler from "../utils/asyncHandler";
+import findOwnedPerson from "../utils/findOwnedPerson";
+import { pickFields } from "../utils/sanitizers";
 
-const findOwnedPerson = async (models, personId, userId) => {
-  const person = await models.Person.findByPk(personId);
-  if (!person) return { error: "Pessoa não encontrada.", status: 404 };
-  if (person.userId !== userId) return { error: "Acesso negado.", status: 403 };
-  return { person };
-};
+const ALLOWED_FIELDS = ["name", "level"];
 
 const getAllSkills = asyncHandler(async (req, res) => {
   const { personId } = req.params;
@@ -20,8 +17,10 @@ const createSkill = asyncHandler(async (req, res) => {
   );
   if (error) return res.status(status).json({ error });
 
+  const data = pickFields(req.body, ALLOWED_FIELDS);
+
   const skill = await req.context.models.Skill.create({
-    ...req.body,
+    ...data,
     personId: person.objectId,
   });
   return res.status(201).json(skill);
@@ -34,8 +33,10 @@ const updateSkill = asyncHandler(async (req, res) => {
   );
   if (error) return res.status(status).json({ error });
 
+  const data = pickFields(req.body, ALLOWED_FIELDS);
+
   const [affectedRows, updated] = await req.context.models.Skill.update(
-    req.body,
+    data,
     { where: { objectId: skillId, personId }, returning: true }
   );
   if (affectedRows === 0)

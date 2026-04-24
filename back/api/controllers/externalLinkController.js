@@ -1,11 +1,8 @@
 import asyncHandler from "../utils/asyncHandler";
+import findOwnedPerson from "../utils/findOwnedPerson";
+import { pickFields } from "../utils/sanitizers";
 
-const findOwnedPerson = async (models, personId, userId) => {
-  const person = await models.Person.findByPk(personId);
-  if (!person) return { error: "Pessoa não encontrada.", status: 404 };
-  if (person.userId !== userId) return { error: "Acesso negado.", status: 403 };
-  return { person };
-};
+const ALLOWED_FIELDS = ["type", "url"];
 
 const getAllExternalLinks = asyncHandler(async (req, res) => {
   const { personId } = req.params;
@@ -22,8 +19,10 @@ const createExternalLink = asyncHandler(async (req, res) => {
   );
   if (error) return res.status(status).json({ error });
 
+  const data = pickFields(req.body, ALLOWED_FIELDS);
+
   const link = await req.context.models.ExternalLink.create({
-    ...req.body,
+    ...data,
     personId: person.objectId,
   });
   return res.status(201).json(link);
@@ -36,8 +35,10 @@ const updateExternalLink = asyncHandler(async (req, res) => {
   );
   if (error) return res.status(status).json({ error });
 
+  const data = pickFields(req.body, ALLOWED_FIELDS);
+
   const [affectedRows, updated] = await req.context.models.ExternalLink.update(
-    req.body,
+    data,
     { where: { objectId: linkId, personId }, returning: true }
   );
   if (affectedRows === 0)

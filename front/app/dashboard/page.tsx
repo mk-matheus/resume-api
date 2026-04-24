@@ -15,6 +15,7 @@ import type { Person, Experience, Education, Skill, Resume, ExternalLink } from 
 import SectionCard from "@/components/dashboard/SectionCard";
 import ItemRow from "@/components/dashboard/ItemRow";
 import Modal from "@/components/dashboard/Modal";
+import ConfirmDialog from "@/components/dashboard/ConfirmDialog";
 import PersonForm from "@/components/dashboard/PersonForm";
 import ExperienceForm from "@/components/dashboard/ExperienceForm";
 import EducationForm from "@/components/dashboard/EducationForm";
@@ -23,6 +24,13 @@ import ResumeForm from "@/components/dashboard/ResumeForm";
 import LinkForm from "@/components/dashboard/LinkForm";
 
 type ModalType = "experience" | "education" | "skill" | "resume" | "link" | null;
+type ToastType = "success" | "error";
+
+interface ConfirmState {
+  title: string;
+  message: string;
+  onConfirm: () => void;
+}
 
 export default function DashboardPage() {
   const { user, personId, loading, logout } = useAuth();
@@ -34,6 +42,8 @@ export default function DashboardPage() {
   const [editItem, setEditItem] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [toast, setToast] = useState("");
+  const [toastType, setToastType] = useState<ToastType>("success");
+  const [confirm, setConfirm] = useState<ConfirmState | null>(null);
 
   // Redireciona se não logado
   useEffect(() => {
@@ -52,8 +62,9 @@ export default function DashboardPage() {
 
   useEffect(() => { fetchPerson(); }, [fetchPerson]);
 
-  const showToast = (msg: string) => {
+  const showToast = (msg: string, type: ToastType = "success") => {
     setToast(msg);
+    setToastType(type);
     setTimeout(() => setToast(""), 3000);
   };
 
@@ -70,82 +81,148 @@ export default function DashboardPage() {
   };
   const closeModal = () => { setModal(null); setEditItem(null); };
 
+  // Helper para confirmar antes de deletar
+  const confirmDelete = (title: string, onConfirm: () => void) => {
+    setConfirm({
+      title: `Excluir ${title}?`,
+      message: "Essa ação não pode ser desfeita. Tem certeza que deseja continuar?",
+      onConfirm: async () => {
+        setConfirm(null);
+        await onConfirm();
+      },
+    });
+  };
+
   // ── Handlers de save ──────────────────────────────────────────────
 
   const savePerson = async (data: Partial<Person>) => {
-    await api.put(`/people/${personId}`, data);
-    await fetchPerson();
-    showToast("Perfil atualizado!");
+    try {
+      await api.put(`/people/${personId}`, data);
+      await fetchPerson();
+      showToast("Perfil atualizado!");
+    } catch {
+      showToast("Erro ao atualizar perfil.", "error");
+    }
   };
 
   const saveExperience = async (data: any) => {
-    if (editItem?.objectId) {
-      await api.put(`/people/${personId}/experiences/${editItem.objectId}`, data);
-    } else {
-      await api.post(`/people/${personId}/experiences`, data);
+    try {
+      if (editItem?.objectId) {
+        await api.put(`/people/${personId}/experiences/${editItem.objectId}`, data);
+      } else {
+        await api.post(`/people/${personId}/experiences`, data);
+      }
+      await fetchPerson(); closeModal(); showToast("Experiência salva!");
+    } catch {
+      showToast("Erro ao salvar experiência.", "error");
     }
-    await fetchPerson(); closeModal(); showToast("Experiência salva!");
   };
 
   const deleteExperience = async (id: string) => {
-    await api.delete(`/people/${personId}/experiences/${id}`);
-    await fetchPerson(); showToast("Experiência removida.");
+    confirmDelete("experiência", async () => {
+      try {
+        await api.delete(`/people/${personId}/experiences/${id}`);
+        await fetchPerson(); showToast("Experiência removida.");
+      } catch {
+        showToast("Erro ao remover experiência.", "error");
+      }
+    });
   };
 
   const saveEducation = async (data: any) => {
-    if (editItem?.objectId) {
-      await api.put(`/people/${personId}/educations/${editItem.objectId}`, data);
-    } else {
-      await api.post(`/people/${personId}/educations`, data);
+    try {
+      if (editItem?.objectId) {
+        await api.put(`/people/${personId}/educations/${editItem.objectId}`, data);
+      } else {
+        await api.post(`/people/${personId}/educations`, data);
+      }
+      await fetchPerson(); closeModal(); showToast("Formação salva!");
+    } catch {
+      showToast("Erro ao salvar formação.", "error");
     }
-    await fetchPerson(); closeModal(); showToast("Formação salva!");
   };
 
   const deleteEducation = async (id: string) => {
-    await api.delete(`/people/${personId}/educations/${id}`);
-    await fetchPerson(); showToast("Formação removida.");
+    confirmDelete("formação", async () => {
+      try {
+        await api.delete(`/people/${personId}/educations/${id}`);
+        await fetchPerson(); showToast("Formação removida.");
+      } catch {
+        showToast("Erro ao remover formação.", "error");
+      }
+    });
   };
 
   const saveSkill = async (data: any) => {
-    if (editItem?.objectId) {
-      await api.put(`/people/${personId}/skills/${editItem.objectId}`, data);
-    } else {
-      await api.post(`/people/${personId}/skills`, data);
+    try {
+      if (editItem?.objectId) {
+        await api.put(`/people/${personId}/skills/${editItem.objectId}`, data);
+      } else {
+        await api.post(`/people/${personId}/skills`, data);
+      }
+      await fetchPerson(); closeModal(); showToast("Skill salva!");
+    } catch {
+      showToast("Erro ao salvar skill.", "error");
     }
-    await fetchPerson(); closeModal(); showToast("Skill salva!");
   };
 
   const deleteSkill = async (id: string) => {
-    await api.delete(`/people/${personId}/skills/${id}`);
-    await fetchPerson(); showToast("Skill removida.");
+    confirmDelete("skill", async () => {
+      try {
+        await api.delete(`/people/${personId}/skills/${id}`);
+        await fetchPerson(); showToast("Skill removida.");
+      } catch {
+        showToast("Erro ao remover skill.", "error");
+      }
+    });
   };
 
   const saveResume = async (data: any) => {
-    if (editItem?.objectId) {
-      await api.put(`/people/${personId}/resumes/${editItem.objectId}`, data);
-    } else {
-      await api.post(`/people/${personId}/resumes`, data);
+    try {
+      if (editItem?.objectId) {
+        await api.put(`/people/${personId}/resumes/${editItem.objectId}`, data);
+      } else {
+        await api.post(`/people/${personId}/resumes`, data);
+      }
+      await fetchPerson(); closeModal(); showToast("Resumo salvo!");
+    } catch {
+      showToast("Erro ao salvar resumo.", "error");
     }
-    await fetchPerson(); closeModal(); showToast("Resumo salvo!");
   };
 
   const deleteResume = async (id: string) => {
-    await api.delete(`/people/${personId}/resumes/${id}`);
-    await fetchPerson(); showToast("Resumo removido.");
+    confirmDelete("resumo", async () => {
+      try {
+        await api.delete(`/people/${personId}/resumes/${id}`);
+        await fetchPerson(); showToast("Resumo removido.");
+      } catch {
+        showToast("Erro ao remover resumo.", "error");
+      }
+    });
   };
 
   const saveLink = async (data: any) => {
-    if (editItem?.objectId) {
-      await api.put(`/people/${personId}/externallinks/${editItem.objectId}`, data);
-    } else {
-      await api.post(`/people/${personId}/externallinks`, data);
+    try {
+      if (editItem?.objectId) {
+        await api.put(`/people/${personId}/externallinks/${editItem.objectId}`, data);
+      } else {
+        await api.post(`/people/${personId}/externallinks`, data);
+      }
+      await fetchPerson(); closeModal(); showToast("Link salvo!");
+    } catch {
+      showToast("Erro ao salvar link.", "error");
     }
-    await fetchPerson(); closeModal(); showToast("Link salvo!");
   };
 
   const deleteLink = async (id: string) => {
-    await api.delete(`/people/${personId}/externallinks/${id}`);
-    await fetchPerson(); showToast("Link removido.");
+    confirmDelete("link", async () => {
+      try {
+        await api.delete(`/people/${personId}/externallinks/${id}`);
+        await fetchPerson(); showToast("Link removido.");
+      } catch {
+        showToast("Erro ao remover link.", "error");
+      }
+    });
   };
 
   // ─────────────────────────────────────────────────────────────────
@@ -167,9 +244,23 @@ export default function DashboardPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl bg-surface-2 border border-brand-500/30 text-white text-sm font-medium shadow-glow animate-fade-up">
+        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl border text-sm font-medium shadow-glow animate-fade-up ${
+          toastType === "error"
+            ? "bg-red-500/15 border-red-500/30 text-red-400"
+            : "bg-surface-2 border-brand-500/30 text-white"
+        }`}>
           {toast}
         </div>
+      )}
+
+      {/* Confirm Dialog */}
+      {confirm && (
+        <ConfirmDialog
+          title={confirm.title}
+          message={confirm.message}
+          onConfirm={confirm.onConfirm}
+          onCancel={() => setConfirm(null)}
+        />
       )}
 
       {/* Modals */}
