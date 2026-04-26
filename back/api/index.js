@@ -45,7 +45,7 @@ app.use((err, req, res, next) => {
 const port = process.env.PORT ?? 3000;
 const eraseDatabaseOnSync = process.env.ERASE_DATABASE === "true";
 
-sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
+sequelize.sync({ force: eraseDatabaseOnSync, alter: !eraseDatabaseOnSync }).then(async () => {
   if (eraseDatabaseOnSync) {
     console.log("⚠️  Banco resetado. Rode novamente com ERASE_DATABASE=false.");
   }

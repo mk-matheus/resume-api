@@ -103,11 +103,11 @@ const me = asyncHandler(async (req, res) => {
       {
         model: models.Person,
         include: [
-          models.Resume,
-          models.Education,
-          models.Experience,
-          models.Skill,
-          models.ExternalLink,
+          { model: models.Resume },
+          { model: models.Education },
+          { model: models.Experience },
+          { model: models.Skill },
+          { model: models.ExternalLink },
         ],
       },
     ],

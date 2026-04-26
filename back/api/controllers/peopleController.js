@@ -19,11 +19,11 @@ const getPersonByUsername = asyncHandler(async (req, res) => {
       {
         model: models.Person,
         include: [
-          models.Resume,
-          models.Education,
-          models.Experience,
-          models.Skill,
-          models.ExternalLink,
+          { model: models.Resume },
+          { model: models.Education },
+          { model: models.Experience },
+          { model: models.Skill },
+          { model: models.ExternalLink },
         ],
       },
     ],
@@ -41,11 +41,11 @@ const getPersonById = asyncHandler(async (req, res) => {
     req.params.personId,
     {
       include: [
-        req.context.models.Resume,
-        req.context.models.Education,
-        req.context.models.Experience,
-        req.context.models.Skill,
-        req.context.models.ExternalLink,
+        { model: req.context.models.Resume },
+        { model: req.context.models.Education },
+        { model: req.context.models.Experience },
+        { model: req.context.models.Skill },
+        { model: req.context.models.ExternalLink },
       ],
     }
   );
