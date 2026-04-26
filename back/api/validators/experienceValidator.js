@@ -33,9 +33,11 @@ export const createExperienceRules = [
     }),
 
   body("description")
-    .optional()
+    .notEmpty()
+    .withMessage('Descreva a função que você exerceu.')
     .isString()
-    .withMessage('O campo "description" deve ser uma string.'),
+    .isLength({ min: 10 })
+    .withMessage('Descreva com pelo menos 10 caracteres.'),
 ];
 
 // Regras para atualização (PUT) - tudo opcional

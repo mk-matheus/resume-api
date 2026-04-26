@@ -10,9 +10,9 @@ import type { Experience } from "@/types";
 const schema = z.object({
   companyName: z.string().min(1, "Empresa obrigatória"),
   role:        z.string().min(1, "Cargo obrigatório"),
+  description: z.string().min(10, "Descreva sua função (mínimo 10 caracteres)"),
   startDate:   z.string().optional(),
   endDate:     z.string().optional(),
-  description: z.string().optional(),
 }).refine(
   (data) => {
     if (data.startDate && data.endDate) {
@@ -39,9 +39,9 @@ export default function ExperienceForm({ initial, onSave, onCancel }: Props) {
     defaultValues: {
       companyName: initial?.companyName ?? "",
       role:        initial?.role        ?? "",
+      description: initial?.description ?? "",
       startDate:   initial?.startDate   ?? "",
       endDate:     initial?.endDate     ?? "",
-      description: initial?.description ?? "",
     },
   });
 
@@ -49,13 +49,13 @@ export default function ExperienceForm({ initial, onSave, onCancel }: Props) {
     if (initial) reset({
       companyName: initial.companyName ?? "",
       role:        initial.role        ?? "",
+      description: initial.description ?? "",
       startDate:   initial.startDate   ?? "",
       endDate:     initial.endDate     ?? "",
-      description: initial.description ?? "",
     });
   }, [initial, reset]);
 
-  // Sanitiza datas vazias ("" → null) antes de enviar
+  // Sanitiza datas vazias ("" → undefined) antes de enviar
   const handleSave = async (data: FormData) => {
     const sanitized = {
       ...data,
@@ -90,9 +90,16 @@ export default function ExperienceForm({ initial, onSave, onCancel }: Props) {
         </div>
       </div>
       <div>
-        <label className="label">Descrição</label>
-        <textarea {...register("description")} rows={3} className="input resize-none"
-          placeholder="Descreva suas responsabilidades e conquistas..." />
+        <label className="label">
+          Descrição <span className="text-red-400 ml-0.5">*</span>
+        </label>
+        <textarea
+          {...register("description")}
+          rows={4}
+          className="input resize-none"
+          placeholder="Descreva suas responsabilidades e conquistas nesta posição..."
+        />
+        {errors.description && <p className="text-red-400 text-xs mt-1">{errors.description.message}</p>}
       </div>
       <div className="flex justify-end gap-3 pt-2">
         <button type="button" onClick={onCancel} className="btn-ghost">Cancelar</button>
