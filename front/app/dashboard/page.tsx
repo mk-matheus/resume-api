@@ -21,10 +21,10 @@ import PersonForm from "@/components/dashboard/PersonForm";
 import ExperienceForm from "@/components/dashboard/ExperienceForm";
 import EducationForm from "@/components/dashboard/EducationForm";
 import SkillForm from "@/components/dashboard/SkillForm";
-import ResumeForm from "@/components/dashboard/ResumeForm";
+import InlineResumeCard from "@/components/dashboard/InlineResumeCard";
 import LinkForm from "@/components/dashboard/LinkForm";
 
-type ModalType = "experience" | "education" | "skill" | "resume" | "link" | null;
+type ModalType = "experience" | "education" | "skill" | "link" | null;
 type ToastType = "success" | "error";
 
 interface ConfirmState {
@@ -211,28 +211,25 @@ export default function DashboardPage() {
     });
   };
 
-  const saveResume = async (data: any) => {
+  const saveResume = async (summary: string) => {
     try {
-      if (editItem?.objectId) {
-        await api.put(`/people/${personId}/resumes/${editItem.objectId}`, data);
+      const existing = person?.Resumes?.[0];
+      if (existing?.objectId) {
+        await api.put(`/people/${personId}/resumes/${existing.objectId}`, {
+          title: "Resumo Profissional",
+          summary,
+        });
       } else {
-        await api.post(`/people/${personId}/resumes`, data);
+        await api.post(`/people/${personId}/resumes`, {
+          title: "Resumo Profissional",
+          summary,
+        });
       }
-      await fetchPerson(); closeModal(); showToast("Resumo salvo!");
+      await fetchPerson();
+      showToast("Resumo salvo!");
     } catch {
       showToast("Erro ao salvar resumo.", "error");
     }
-  };
-
-  const deleteResume = async (id: string) => {
-    confirmDelete("resumo", async () => {
-      try {
-        await api.delete(`/people/${personId}/resumes/${id}`);
-        await fetchPerson(); showToast("Resumo removido.");
-      } catch {
-        showToast("Erro ao remover resumo.", "error");
-      }
-    });
   };
 
   const saveLink = async (data: any) => {
@@ -320,11 +317,6 @@ export default function DashboardPage() {
       {modal === "skill" && (
         <Modal title={editItem ? "Editar Skill" : "Nova Skill"} onClose={closeModal}>
           <SkillForm initial={editItem} onSave={saveSkill} onCancel={closeModal} />
-        </Modal>
-      )}
-      {modal === "resume" && (
-        <Modal title={editItem ? "Editar Resumo" : "Novo Resumo"} onClose={closeModal}>
-          <ResumeForm initial={editItem} onSave={saveResume} onCancel={closeModal} />
         </Modal>
       )}
       {modal === "link" && (
@@ -558,29 +550,12 @@ export default function DashboardPage() {
             <SectionCard
               title="Resumo Profissional"
               icon={<FileText size={18} />}
-              count={person.Resumes?.length ?? 0}
-              onAdd={() => openModal("resume")}
               id="section-resume"
             >
-              {person.Resumes?.length === 0 && (
-                <div className="text-center py-8">
-                  <FileText size={32} className="mx-auto text-white/10 mb-3" />
-                  <p className="text-white/30 text-sm">Nenhum resumo ainda.</p>
-                  <button onClick={() => openModal("resume")} className="text-brand-400 text-sm mt-1 hover:text-brand-300 transition-colors">
-                    + Adicionar resumo
-                  </button>
-                </div>
-              )}
-              {person.Resumes?.map((r) => (
-                <ItemRow
-                  key={r.objectId}
-                  title={r.title}
-                  onEdit={() => openModal("resume", r)}
-                  onDelete={() => deleteResume(r.objectId)}
-                >
-                  {r.summary && <p>{r.summary}</p>}
-                </ItemRow>
-              ))}
+              <InlineResumeCard
+                resume={person.Resumes?.[0] ?? null}
+                onSave={saveResume}
+              />
             </SectionCard>
 
             {/* Experiências */}

@@ -13,7 +13,23 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-const LINK_TYPES = ["github", "linkedin", "portfolio", "twitter", "instagram", "youtube", "outro"];
+const LINK_TYPES: { value: string; label: string; prefix: string }[] = [
+  { value: "github",    label: "GitHub",    prefix: "https://github.com/" },
+  { value: "linkedin",  label: "LinkedIn",  prefix: "https://linkedin.com/in/" },
+  { value: "portfolio", label: "Portfolio", prefix: "https://" },
+  { value: "twitter",   label: "Twitter/X", prefix: "https://x.com/" },
+  { value: "instagram", label: "Instagram", prefix: "https://instagram.com/" },
+  { value: "youtube",   label: "YouTube",   prefix: "https://youtube.com/" },
+  { value: "outro",     label: "Outro",     prefix: "https://" },
+];
+
+function getPrefixByType(type: string) {
+  return LINK_TYPES.find((t) => t.value === type)?.prefix ?? "https://";
+}
+
+function isPrefixOnly(url: string) {
+  return LINK_TYPES.some((t) => t.prefix === url || url === "https://");
+}
 
 interface Props {
   initial?: Partial<ExternalLink>;
@@ -22,27 +38,49 @@ interface Props {
 }
 
 export default function LinkForm({ initial, onSave, onCancel }: Props) {
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { type: initial?.type ?? "github", url: initial?.url ?? "" },
+    defaultValues: {
+      type: initial?.type ?? "github",
+      url:  initial?.url  ?? getPrefixByType(initial?.type ?? "github"),
+    },
   });
 
-  useEffect(() => { if (initial) reset(initial as FormData); }, [initial]);
+  // Se estiver editando, carrega o valor existente
+  useEffect(() => {
+    if (initial) reset({ type: initial.type ?? "github", url: initial.url ?? "" });
+  }, [initial, reset]);
+
+  // Quando o tipo muda, auto-completa o prefixo (só se URL estiver vazia ou só com prefixo)
+  const selectedType = watch("type");
+  useEffect(() => {
+    if (initial?.url) return; // editando: não sobrescreve
+    const currentUrl = watch("url");
+    if (!currentUrl || isPrefixOnly(currentUrl)) {
+      setValue("url", getPrefixByType(selectedType), { shouldDirty: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedType]);
 
   return (
     <form onSubmit={handleSubmit(onSave)} className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="label">Tipo</label>
-          <select {...register("type")} className="input">
-            {LINK_TYPES.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="label">URL</label>
-          <input {...register("url")} className="input" placeholder="https://..." />
-          {errors.url && <p className="text-red-400 text-xs mt-1">{errors.url.message}</p>}
-        </div>
+      <div>
+        <label className="label">Rede / Tipo</label>
+        <select {...register("type")} className="input">
+          {LINK_TYPES.map((t) => (
+            <option key={t.value} value={t.value}>{t.label}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="label">URL</label>
+        <input
+          {...register("url")}
+          className="input font-mono text-sm"
+          placeholder="https://..."
+          spellCheck={false}
+        />
+        {errors.url && <p className="text-red-400 text-xs mt-1">{errors.url.message}</p>}
       </div>
       <div className="flex justify-end gap-3 pt-2">
         <button type="button" onClick={onCancel} className="btn-ghost">Cancelar</button>
