@@ -66,12 +66,12 @@ export default function PersonForm({ person, onSave }: Props) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <label className="label">Nome completo</label>
+        <label className="label">Nome completo <span className="required-mark">*</span></label>
         <input {...register("name")} className="input" placeholder="Seu Nome" />
         {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>}
       </div>
       <div>
-        <label className="label">E-mail</label>
+        <label className="label">E-mail <span className="required-mark">*</span></label>
         <input {...register("email")} type="email" className="input" placeholder="voce@email.com" />
         {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
       </div>

@@ -6,9 +6,10 @@ import Link from "next/link";
 import {
   User, Briefcase, GraduationCap, Zap, FileText,
   Link2, LogOut, ExternalLink as ExtLinkIcon, Loader2, Copy, Check,
-  Menu, X, TrendingUp, CheckCircle2,
+  Menu, X, TrendingUp, CheckCircle2, Sun, Moon,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/ThemeProvider";
 import api from "@/lib/api";
 import { formatDate, getInitials, cn } from "@/lib/utils";
 import type { Person, Experience, Education, Skill, Resume, ExternalLink } from "@/types";
@@ -45,6 +46,7 @@ const SECTIONS = [
 
 export default function DashboardPage() {
   const { user, personId, loading, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
 
   const [person, setPerson] = useState<Person | null>(null);
@@ -328,8 +330,8 @@ export default function DashboardPage() {
       {/* Mobile overlay menu */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-72 p-6 animate-fade-in" style={{ background: "var(--color-surface-1)" }}>
+          <div className="absolute inset-0 backdrop-blur-sm" style={{ background: "var(--overlay-bg)" }} onClick={() => setMobileMenuOpen(false)} />
+          <div className="absolute left-0 top-0 bottom-0 w-72 p-6 animate-fade-in" style={{ background: "var(--color-surface1)" }}>
             <div className="flex items-center justify-between mb-8">
               <span className="font-display font-bold text-xl text-white">
                 Resume<span className="text-gradient">Forge</span>
@@ -340,7 +342,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Avatar mobile */}
-            <div className="flex items-center gap-3 mb-6 p-3 rounded-xl" style={{ background: "var(--color-surface-2)" }}>
+            <div className="flex items-center gap-3 mb-6 p-3 rounded-xl" style={{ background: "var(--color-surface2)" }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center font-display font-bold text-sm text-white"
                 style={{ background: "linear-gradient(135deg, #6157f6, #a855f7)" }}>
                 {getInitials(person.name)}
@@ -382,6 +384,11 @@ export default function DashboardPage() {
                 {copied ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
                 {copied ? "Copiado!" : "Copiar link"}
               </button>
+              <button onClick={toggleTheme}
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors">
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                {theme === "dark" ? "Tema claro" : "Tema escuro"}
+              </button>
             </div>
 
             <button onClick={logout}
@@ -397,7 +404,7 @@ export default function DashboardPage() {
 
         {/* Sidebar desktop */}
         <aside className="hidden lg:flex flex-col w-[272px] border-r border-white/6 fixed h-full z-10"
-          style={{ background: "var(--color-surface-1)" }}>
+          style={{ background: "var(--color-surface1)" }}>
 
           {/* Logo */}
           <div className="px-6 pt-6 pb-4">
@@ -407,7 +414,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Avatar + info */}
-          <div className="mx-4 mb-4 p-4 rounded-2xl" style={{ background: "var(--color-surface-2)" }}>
+          <div className="mx-4 mb-4 p-4 rounded-2xl" style={{ background: "var(--color-surface2)" }}>
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-xl flex items-center justify-center font-display font-bold text-sm text-white flex-shrink-0"
                 style={{ background: "linear-gradient(135deg, #6157f6, #a855f7)" }}>
@@ -454,6 +461,11 @@ export default function DashboardPage() {
               {copied ? <Check size={15} className="text-green-400" /> : <Copy size={15} />}
               {copied ? "Copiado!" : "Copiar link"}
             </button>
+            <button onClick={toggleTheme}
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-white/45 hover:text-white hover:bg-white/5 transition-colors">
+              {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+              {theme === "dark" ? "Tema claro" : "Tema escuro"}
+            </button>
             <button onClick={logout}
               className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-white/35 hover:text-red-400 hover:bg-red-500/10 transition-colors">
               <LogOut size={15} /> Sair
@@ -466,7 +478,7 @@ export default function DashboardPage() {
 
           {/* Mobile header */}
           <div className="flex items-center justify-between px-5 py-4 lg:hidden border-b border-white/6"
-            style={{ background: "var(--color-surface-1)" }}>
+            style={{ background: "var(--color-surface1)" }}>
             <button onClick={() => setMobileMenuOpen(true)} className="text-white/60 hover:text-white transition-colors">
               <Menu size={22} />
             </button>

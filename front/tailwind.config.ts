@@ -28,10 +28,10 @@ const config: Config = {
           950: "#1e1660",
         },
         surface: {
-          DEFAULT: "#0d0d14",
-          1: "#13131f",
-          2: "#1a1a2e",
-          3: "#22223d",
+          DEFAULT: "var(--color-bg)",
+          1: "var(--color-surface1)",
+          2: "var(--color-surface2)",
+          3: "var(--color-surface3)",
         },
       },
       backgroundImage: {

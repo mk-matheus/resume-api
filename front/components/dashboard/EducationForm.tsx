@@ -109,12 +109,12 @@ export default function EducationForm({ initial, onSave, onCancel }: Props) {
     <form onSubmit={handleSubmit(handleSave)} className="flex flex-col gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="label">Instituição</label>
+          <label className="label">Instituição <span className="required-mark">*</span></label>
           <input {...register("institutionName")} className="input" placeholder="Nome da universidade" />
           {errors.institutionName && <p className="text-red-400 text-xs mt-1">{errors.institutionName.message}</p>}
         </div>
         <div>
-          <label className="label">Curso</label>
+          <label className="label">Curso <span className="required-mark">*</span></label>
           <input {...register("course")} className="input" placeholder="Ex: Ciência da Computação" />
           {errors.course && <p className="text-red-400 text-xs mt-1">{errors.course.message}</p>}
         </div>

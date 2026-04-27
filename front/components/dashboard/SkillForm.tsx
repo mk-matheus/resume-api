@@ -33,7 +33,7 @@ export default function SkillForm({ initial, onSave, onCancel }: Props) {
     <form onSubmit={handleSubmit(onSave)} className="flex flex-col gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="label">Skill</label>
+          <label className="label">Skill <span className="required-mark">*</span></label>
           <input {...register("name")} className="input" placeholder="Ex: React, Node.js, SQL..." />
           {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>}
         </div>

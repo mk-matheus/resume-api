@@ -136,7 +136,7 @@ export default function LandingPage() {
             {steps.map((s, i) => (
               <div key={i} className="flex items-start gap-6">
                 <div className="flex-shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center font-mono font-bold text-lg text-brand-400 relative z-10"
-                  style={{ background: "var(--color-surface-2)", border: "1px solid rgba(97,87,246,0.3)" }}>
+                  style={{ background: "var(--color-surface2)", border: "1px solid rgba(97,87,246,0.3)" }}>
                   {s.n}
                 </div>
                 <div className="pt-3">

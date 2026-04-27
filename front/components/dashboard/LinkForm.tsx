@@ -65,7 +65,7 @@ export default function LinkForm({ initial, onSave, onCancel }: Props) {
   return (
     <form onSubmit={handleSubmit(onSave)} className="flex flex-col gap-4">
       <div>
-        <label className="label">Rede / Tipo</label>
+        <label className="label">Rede / Tipo <span className="required-mark">*</span></label>
         <select {...register("type")} className="input">
           {LINK_TYPES.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
@@ -73,7 +73,7 @@ export default function LinkForm({ initial, onSave, onCancel }: Props) {
         </select>
       </div>
       <div>
-        <label className="label">URL</label>
+        <label className="label">URL <span className="required-mark">*</span></label>
         <input
           {...register("url")}
           className="input font-mono text-sm"

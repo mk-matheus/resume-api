@@ -69,12 +69,12 @@ export default function ExperienceForm({ initial, onSave, onCancel }: Props) {
     <form onSubmit={handleSubmit(handleSave)} className="flex flex-col gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="label">Empresa</label>
+          <label className="label">Empresa <span className="required-mark">*</span></label>
           <input {...register("companyName")} className="input" placeholder="Nome da empresa" />
           {errors.companyName && <p className="text-red-400 text-xs mt-1">{errors.companyName.message}</p>}
         </div>
         <div>
-          <label className="label">Cargo</label>
+          <label className="label">Cargo <span className="required-mark">*</span></label>
           <input {...register("role")} className="input" placeholder="Ex: Dev Full Stack" />
           {errors.role && <p className="text-red-400 text-xs mt-1">{errors.role.message}</p>}
         </div>
@@ -91,7 +91,7 @@ export default function ExperienceForm({ initial, onSave, onCancel }: Props) {
       </div>
       <div>
         <label className="label">
-          Descrição <span className="text-red-400 ml-0.5">*</span>
+          Descrição <span className="required-mark">*</span>
         </label>
         <textarea
           {...register("description")}

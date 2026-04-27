@@ -26,9 +26,7 @@ export default function SectionCard({ title, icon, count, onAdd, children, defau
           ? "border-brand-500/20 bg-surface-1"
           : "border-white/8 bg-surface-1 hover:border-white/15"
       )} style={{
-        boxShadow: open
-          ? "0 4px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(97,87,246,0.08), inset 0 1px 0 rgba(255,255,255,0.06)"
-          : "0 2px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)",
+        boxShadow: open ? 'var(--shadow-card)' : 'var(--shadow-sm)',
       }}>
         {/* Header */}
         <div
